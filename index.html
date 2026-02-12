@@ -1,377 +1,61 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VaComoPiña – Pedido</title>
-  <style>
-    :root { --b:#e6e6e6; --t:#111; --m:#666; }
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;max-width:860px;margin:22px auto;padding:0 14px;color:var(--t)}
-    h1{margin:0 0 6px;font-size:26px}
-    .sub{margin:0 0 14px;color:var(--m)}
-    .grid{display:grid;grid-template-columns:1fr;gap:12px}
-    @media(min-width:860px){ .grid{grid-template-columns:1.1fr 0.9fr} }
-    .card{border:1px solid var(--b);border-radius:14px;padding:14px}
-    .card h2{margin:0 0 10px;font-size:18px}
-    label{display:block;margin:10px 0 6px;font-weight:600}
-    input, select, textarea{width:100%;padding:10px;border:1px solid #cfcfcf;border-radius:12px;font-size:14px}
-    textarea{resize:vertical}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .muted{color:var(--m);font-size:13px;margin-top:6px;line-height:1.35}
-    .price{font-weight:700}
-    .pill{display:inline-block;border:1px solid var(--b);border-radius:999px;padding:4px 10px;font-size:12px;color:#333;margin-top:6px}
-    .viandas{display:grid;grid-template-columns:1fr;gap:10px}
-    .vitem{border:1px solid var(--b);border-radius:12px;padding:10px}
-    .vname{font-weight:650;margin-bottom:8px}
-    .vcontrols{display:flex;gap:8px;align-items:center}
-    .vcontrols button{width:34px;height:34px;border-radius:10px;border:1px solid var(--b);background:#fff;cursor:pointer;font-size:18px}
-    .vqty{width:72px;text-align:center}
-    .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px}
-    .counter{font-weight:700}
-    .warn{color:#b00020;font-weight:650}
-    .ok{color:#0a7a2f;font-weight:650}
-    .btn{width:100%;padding:14px;border:0;border-radius:14px;font-size:16px;cursor:pointer}
-    .btnPrimary{background:#111;color:#fff}
-    .btnSecondary{background:#f4f4f4}
-    .totals{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:15px}
-    .sticky{position:sticky;top:12px}
-    .small{font-size:12px;color:var(--m)}
-    .divider{height:1px;background:var(--b);margin:12px 0}
-  </style>
-</head>
-<body>
-  <h1>🥪 VaComoPiña</h1>
-  <p class="sub">Armá tu pedido y se envía directo por WhatsApp. <span class="pill">Ciudadela</span></p>
+<style>
+.step { display:none; }
+.step.active { display:block; }
+.navBtns { margin-top:15px; }
+button { padding:10px 15px; margin-right:10px; }
+</style>
 
-  <div class="grid">
-    <!-- Left -->
-    <div class="card">
-      <h2>1) Elegí productos</h2>
+<div id="step1" class="step active">
+  <h2>1️⃣ Elegí productos</h2>
 
-      <div class="row">
-        <div>
-          <label>Docena de sándwiches clásicos <span class="price">($26.000)</span></label>
-          <input id="qClasicos" type="number" min="0" value="0" />
-          <div class="muted">Sabores: jamón y queso / jamón y tomate / jamón y huevo</div>
-        </div>
-        <div>
-          <label>Docena de sándwiches especiales <span class="price">($30.000)</span></label>
-          <input id="qEspeciales" type="number" min="0" value="0" />
-          <div class="muted">Sabores: jamón crudo, rúcula y parmesano · atún, huevo y queso · César (pollo parmesano y lechuga) · Capresse (queso, tomate y albahaca)</div>
-        </div>
-      </div>
+  Docena Clásicos:
+  <input id="qClasicos" type="number" min="0" value="0"><br><br>
 
-      <label>Detalle de sándwiches (opcional)</label>
-      <textarea id="detalleSand" rows="4" placeholder="Ej: Clásicos: 6 JyQ + 6 jamón y huevo. Especiales: 6 capresse + 6 cesar."></textarea>
+  Docena Especiales:
+  <input id="qEspeciales" type="number" min="0" value="0"><br><br>
 
-      <div class="divider"></div>
+  Pack 7 Viandas:
+  <input id="qPacks" type="number" min="0" value="0"><br>
 
-      <h2>2) Pack 7 Viandas <span class="price">($59.000)</span></h2>
-
-      <label>Cantidad de packs (cada pack = 7 viandas)</label>
-      <input id="qPacks" type="number" min="0" value="0" />
-
-      <div class="bar">
-        <div class="counter">Tenés que elegir: <span id="need">0</span> viandas</div>
-        <div class="counter">Elegidas: <span id="picked">0</span></div>
-      </div>
-      <div id="pickStatus" class="muted">Elegí la cantidad de packs para habilitar la selección.</div>
-
-      <div class="viandas" id="viandasList" style="margin-top:10px;"></div>
-
-      <label>Notas para viandas (opcional)</label>
-      <textarea id="detalleV" rows="3" placeholder="Ej: sin cebolla / porciones para freezer / etc."></textarea>
-    </div>
-
-    <!-- Right (sticky checkout) -->
-    <div class="card sticky">
-      <h2>3) Datos de entrega y pago</h2>
-
-      <label>📍 Dirección completa</label>
-      <input id="direccion" type="text" placeholder="Calle, número, piso/depto, entre calles" />
-
-      <div class="row">
-        <div>
-          <label>📏 ¿Más de 3 km desde Ciudadela?</label>
-          <select id="mas3km">
-            <option value="NO">NO</option>
-            <option value="SI">SI</option>
-          </select>
-          <div class="small">Regla: gratis hasta 3 km, $5.000 fuera de ese radio. Gratis en compras &gt; $100.000.</div>
-        </div>
-        <div>
-          <label>🕒 Turno deseado</label>
-          <select id="turno">
-            <option value="13:00–15:00">13:00–15:00</option>
-            <option value="19:00–21:00">19:00–21:00</option>
-          </select>
-        </div>
-      </div>
-
-      <label>💳 Forma de pago</label>
-      <select id="pago">
-        <option value="Mercado Pago">Mercado Pago</option>
-        <option value="Efectivo">Efectivo</option>
-      </select>
-
-      <div class="divider"></div>
-
-      <div class="totals">
-        <div>Total estimado (sin envío)</div>
-        <div><strong id="total">$0</strong></div>
-      </div>
-      <div class="small" style="margin-top:6px;">
-        Envío se confirma por WhatsApp según distancia/total.
-      </div>
-
-      <div style="margin-top:12px;">
-        <button id="enviar" class="btn btnPrimary">Hacer pedido</button>
-        <button id="limpiar" class="btn btnSecondary" style="margin-top:10px;">Limpiar</button>
-      </div>
-
-      <div id="error" class="warn" style="margin-top:10px;display:none;"></div>
-    </div>
+  <div class="navBtns">
+    <button onclick="nextStep(2)">Siguiente</button>
   </div>
+</div>
 
-  <script>
-    // === CONFIG ===
-    const WA = "5491164876213";
+<div id="step2" class="step">
+  <h2>2️⃣ Elegí tus viandas</h2>
+  <div id="viandasContainer"></div>
 
-    const PRICES = {
-      clasicos: 26000,
-      especiales: 30000,
-      pack: 59000
-    };
+  <div class="navBtns">
+    <button onclick="prevStep(1)">Volver</button>
+    <button onclick="nextStep(3)">Siguiente</button>
+  </div>
+</div>
 
-    const VIANDAS = [
-      "Empanadas de jamón, queso tybo, muzarela, cebolla y un toque de Roquefort",
-      "Churrasquitos de pollo con arroz integral y vegetales",
-      "Tapa de asado al horno con bombas de papa y muzarela",
-      "Espaguetis integrales con verduras y carne",
-      "Pollo a la portuguesa con arroz amarillo",
-      "Suprema napolitana con milhojas de papa",
-      "1/4 de pollo al horno con papa, batata y cebolla"
-    ];
+<div id="step3" class="step">
+  <h2>3️⃣ Datos de entrega</h2>
 
-    // === HELPERS ===
-    const $ = (id) => document.getElementById(id);
-    const money = (n) => "$" + (Number(n)||0).toLocaleString("es-AR");
+  Dirección:
+  <input id="direccion"><br><br>
 
-    function clampNonNegInt(v){
-      const n = Number(v);
-      if (!Number.isFinite(n) || n < 0) return 0;
-      return Math.floor(n);
-    }
+  Turno:
+  <select id="turno">
+    <option>13:00–15:00</option>
+    <option>19:00–21:00</option>
+  </select><br><br>
 
-    // === BUILD VIANDAS UI ===
-    const viandasList = $("viandasList");
-    const state = { vqty: Array(VIANDAS.length).fill(0) };
+  <div class="navBtns">
+    <button onclick="prevStep(2)">Volver</button>
+    <button onclick="enviarPedido()">Enviar pedido</button>
+  </div>
+</div>
 
-    function renderViandas(){
-      viandasList.innerHTML = "";
-      VIANDAS.forEach((name, i) => {
-        const item = document.createElement("div");
-        item.className = "vitem";
-        item.innerHTML = `
-          <div class="vname">${name}</div>
-          <div class="vcontrols">
-            <button type="button" data-i="${i}" data-d="-1">−</button>
-            <input class="vqty" id="v_${i}" type="number" min="0" value="${state.vqty[i]}" />
-            <button type="button" data-i="${i}" data-d="1">+</button>
-          </div>
-        `;
-        viandasList.appendChild(item);
-      });
-
-      // Bind buttons
-      viandasList.querySelectorAll("button[data-i]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const i = Number(btn.dataset.i);
-          const d = Number(btn.dataset.d);
-          const need = getNeed();
-          if (need === 0) return;
-
-          const picked = getPicked();
-          // Don't allow exceeding need
-          if (d > 0 && picked >= need) return;
-
-          state.vqty[i] = Math.max(0, state.vqty[i] + d);
-          $("v_" + i).value = state.vqty[i];
-          updatePickStatus();
-        });
-      });
-
-      // Bind inputs
-      viandasList.querySelectorAll("input[id^='v_']").forEach(inp => {
-        inp.addEventListener("input", () => {
-          const i = Number(inp.id.split("_")[1]);
-          const need = getNeed();
-          if (need === 0) { inp.value = 0; state.vqty[i] = 0; updatePickStatus(); return; }
-
-          let val = clampNonNegInt(inp.value);
-          // If setting this makes us exceed, reduce
-          const pickedMinusThis = getPicked() - state.vqty[i];
-          const maxHere = Math.max(0, need - pickedMinusThis);
-          if (val > maxHere) val = maxHere;
-
-          state.vqty[i] = val;
-          inp.value = val;
-          updatePickStatus();
-        });
-      });
-    }
-
-    function getNeed(){
-      return clampNonNegInt($("qPacks").value) * 7;
-    }
-
-    function getPicked(){
-      return state.vqty.reduce((a,b)=>a+b,0);
-    }
-
-    function updatePickStatus(){
-      const need = getNeed();
-      const picked = getPicked();
-      $("need").textContent = need;
-      $("picked").textContent = picked;
-
-      const status = $("pickStatus");
-      if (need === 0){
-        status.className = "muted";
-        status.textContent = "Elegí la cantidad de packs para habilitar la selección.";
-        // reset viandas selection if no packs
-        state.vqty = state.vqty.map(()=>0);
-        viandasList.querySelectorAll("input[id^='v_']").forEach(inp => inp.value = 0);
-      } else if (picked < need){
-        status.className = "warn";
-        status.textContent = `Te faltan ${need - picked} viandas para completar el pack.`;
-      } else if (picked > need){
-        status.className = "warn";
-        status.textContent = `Te pasaste por ${picked - need} (ajustá las cantidades).`;
-      } else {
-        status.className = "ok";
-        status.textContent = "Selección completa ✅";
-      }
-
-      updateTotal();
-    }
-
-    function updateTotal(){
-      const qC = clampNonNegInt($("qClasicos").value);
-      const qE = clampNonNegInt($("qEspeciales").value);
-      const qP = clampNonNegInt($("qPacks").value);
-
-      const total = qC*PRICES.clasicos + qE*PRICES.especiales + qP*PRICES.pack;
-      $("total").textContent = money(total);
-    }
-
-    function showError(msg){
-      const e = $("error");
-      e.style.display = "block";
-      e.textContent = msg;
-    }
-
-    function clearError(){
-      const e = $("error");
-      e.style.display = "none";
-      e.textContent = "";
-    }
-
-    // === EVENTS ===
-    ["qClasicos","qEspeciales","qPacks"].forEach(id => {
-      $(id).addEventListener("input", () => {
-        // normalize to int
-        $(id).value = clampNonNegInt($(id).value);
-        if (id === "qPacks") updatePickStatus();
-        else updateTotal();
-      });
-    });
-
-    $("limpiar").addEventListener("click", () => {
-      $("qClasicos").value = 0;
-      $("qEspeciales").value = 0;
-      $("qPacks").value = 0;
-      $("detalleSand").value = "";
-      $("detalleV").value = "";
-      $("direccion").value = "";
-      $("mas3km").value = "NO";
-      $("turno").value = "13:00–15:00";
-      $("pago").value = "Mercado Pago";
-      state.vqty = state.vqty.map(()=>0);
-      renderViandas();
-      updatePickStatus();
-      clearError();
-    });
-
-    $("enviar").addEventListener("click", () => {
-      clearError();
-
-      const qC = clampNonNegInt($("qClasicos").value);
-      const qE = clampNonNegInt($("qEspeciales").value);
-      const qP = clampNonNegInt($("qPacks").value);
-
-      if (qC + qE + qP === 0){
-        showError("Elegí al menos un producto para armar el pedido.");
-        return;
-      }
-
-      const need = getNeed();
-      const picked = getPicked();
-      if (need > 0 && picked !== need){
-        showError(`Para ${qP} pack(s) necesitás elegir ${need} viandas. Ahora tenés ${picked}.`);
-        return;
-      }
-
-      const total = qC*PRICES.clasicos + qE*PRICES.especiales + qP*PRICES.pack;
-
-      // Build viandas breakdown
-      let vLines = "";
-      if (qP > 0){
-        const lines = [];
-        state.vqty.forEach((n, i) => {
-          if (n > 0) lines.push(`- ${n} × ${VIANDAS[i]}`);
-        });
-        vLines = lines.length ? lines.join("\n") : "-";
-      }
-
-      const msg =
-`Hola! Quiero hacer un pedido en VaComoPiña 🥪
-
-🧾 Pedido:
-- Docena Clásicos: ${qC} (${money(PRICES.clasicos)} c/u)
-- Docena Especiales: ${qE} (${money(PRICES.especiales)} c/u)
-- Pack 7 Viandas: ${qP} (${money(PRICES.pack)} c/u)
-
-🥪 Detalle de sándwiches:
-${$("detalleSand").value?.trim() || "-"}
-
-🍱 Selección de viandas:
-${qP > 0 ? vLines : "-"}
-
-📝 Notas viandas:
-${$("detalleV").value?.trim() || "-"}
-
-📍 Dirección:
-${$("direccion").value?.trim() || "-"}
-
-📏 ¿Más de 3 km desde Ciudadela?: ${$("mas3km").value}
-🕒 Turno deseado: ${$("turno").value}
-💳 Forma de pago: ${$("pago").value}
-
-💰 Total estimado (sin envío): ${money(total)}
-
-Aclaración envío:
-- Gratis hasta 3 km
-- $5.000 fuera de ese radio
-- Gratis en compras mayores a $100.000`;
-
-      const url = `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
-      window.open(url, "_blank");
-    });
-
-    // init
-    renderViandas();
-    updatePickStatus();
-  </script>
-</body>
-</html>
+<script>
+function nextStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step'+n).classList.add('active');
+}
+function prevStep(n){
+  nextStep(n);
+}
+</script>
